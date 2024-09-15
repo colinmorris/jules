@@ -15,6 +15,10 @@ SERVER_URL = os.getenv('MY_SERVER_URL')
 
 bot = telebot.TeleBot(BOT_TOKEN)
 
+@app.route('/')
+def hello():
+    return "hi world", 200
+
 @app.route('/' + BOT_TOKEN, methods=['POST'])
 def webhook():
     update = telebot.types.Update.de_json(request.stream.read().decode('utf-8'))
