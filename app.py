@@ -13,7 +13,10 @@ BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 LLM_API_KEY = os.getenv('LLM_API_KEY')
 SERVER_URL = os.getenv('MY_SERVER_URL')
 
-bot = telebot.TeleBot(BOT_TOKEN)
+# PythonAnywhere seems to fail to handle requests in some mysterious way unless
+# threading is disabled? Not sure why. Found here:
+# https://github.com/eternnoir/pyTelegramBotAPI/issues/340
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
 
 @app.route('/')
 def hello():
