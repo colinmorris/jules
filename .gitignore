@@ -1,4 +1,4 @@
 .env
-responses.log
+*.log
 messages.json
 venv/

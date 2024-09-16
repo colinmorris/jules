@@ -13,26 +13,32 @@ MODELNAME = "nousresearch/hermes-3-llama-3.1-405b"
 
 LOG_RESPONSES = 1
 RESPONSE_LOG_FILE = 'responses.log'
+LOG_REQUESTS = 1
+REQUEST_LOG_FILE = 'requests.log'
 
 def raw_query(messages):
     """Return a response object"""
+    data=json.dumps({
+        "model": MODELNAME,
+        "messages": messages,
+        })
+    if LOG_REQUESTS:
+        with open(REQUEST_LOG_FILE, 'a') as f:
+            f.write(data+'\n')
     response = requests.post(
             url=API_URL,
             headers={"Authorization": f"Bearer {API_KEY}"},
-            data=json.dumps({
-                "model": MODELNAME,
-                "messages": messages,
-                }),
+            data=data,
             )
     if LOG_RESPONSES:
         with open(RESPONSE_LOG_FILE, 'a') as f:
-            f.write(response.text + '\n')
+            f.write(response.text.strip() + '\n')
 
     return response
 
 def query(messages):
     resp = raw_query(messages)
-    dat = json.loads(response.text)
+    dat = json.loads(resp.text)
     msgs = dat['choices']
     assert len(msgs) == 1, msgs
     # Should be a StreamingChoice object
