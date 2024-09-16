@@ -62,4 +62,9 @@ class MessageHistory(object):
         with open(self.fname, 'w') as f:
             json.dump(self.messages, f, indent=4 if PPRINT_JSON else None)
 
+    def reset(self):
+        """Clear the message store of all messages."""
+        self.messages = []
+        self.flush()
+
 
