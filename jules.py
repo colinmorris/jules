@@ -1,22 +1,24 @@
 import requests
 import json
+import pathlib
 
 import message_store
 import llm
+import utils
 
 GOALS_FNAME = 'goals.txt'
 
 # How many of the most recent messages to send to the model
 N_CONTEXT_MESSAGES = 5
 
-with open('system_prompt.txt') as f:
+with open(utils.sibpath('system_prompt.txt')) as f:
     SYSTEM_PROMPT = f.read()
 
 class Jules(object):
 
     def __init__(self):
         self.messages = message_store.MessageHistory()
-        with open(GOALS_FNAME) as f:
+        with open(utils.sibpath(GOALS_FNAME)) as f:
             self.goals_doc = f.read()
 
     def emit_wakeup_message(self):

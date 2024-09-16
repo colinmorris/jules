@@ -2,6 +2,8 @@ import datetime
 import json
 import os
 
+import utils
+
 MESSAGE_HISTORY_FILENAME = 'messages.json'
 # Whether to pretty-print content in messages.json
 PPRINT_JSON = 1
@@ -32,8 +34,10 @@ class MessageHistory(object):
 
     def __init__(self, message_filename=None, reset=False):
         self.fname = message_filename or MESSAGE_HISTORY_FILENAME
-        if os.path.exists(self.fname) and not reset:
-            with open(self.fname) as f:
+        path = utils.sibpath(self.fname)
+        self.path = path
+        if os.path.exists(path) and not reset:
+            with open(path) as f:
                 self.messages = json.load(f)
         else:
             self.messages = []
@@ -59,7 +63,7 @@ class MessageHistory(object):
         return msgs
 
     def flush(self):
-        with open(self.fname, 'w') as f:
+        with open(self.path, 'w') as f:
             json.dump(self.messages, f, indent=4 if PPRINT_JSON else None)
 
     def reset(self):
