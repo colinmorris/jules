@@ -26,7 +26,11 @@ class Jules(object):
         # are trained on convos that strictly alternate between user and assistant
         # messages? Maybe can do something with prefill here?)
         preamble = "<thinking>It's 9am. Time for Colin's morning wakeup message. I will encourage him to start the day in a thoughtful way, avoiding falling into distractions. I will pick only ONE item from the goal list to suggest he work on. If he pushes back, I'll work with him to identify a different goal.</thinking>"
-        self.messages.add_message(preamble, 'assistant')
+        #self.messages.add_message(preamble, 'assistant')
+
+        # Trying a different tack
+        user_preamble = "Good morning Jules. I could use some encouragement to start the morning in a salutary way, and a suggestion for one task to work on today."
+        self.messages.add_message(user_preamble, 'user')
         msg = self.query_llm()
         return msg
 

@@ -3,6 +3,8 @@ import json
 import os
 
 MESSAGE_HISTORY_FILENAME = 'messages.json'
+# Whether to pretty-print content in messages.json
+PPRINT_JSON = 1
 
 def fmt_timestamp(timestamp):
     dt = datetime.datetime.fromtimestamp(timestamp)
@@ -58,6 +60,6 @@ class MessageHistory(object):
 
     def flush(self):
         with open(self.fname, 'w') as f:
-            json.dump(self.messages, f)
+            json.dump(self.messages, f, indent=4 if PPRINT_JSON else None)
 
 
