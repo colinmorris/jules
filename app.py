@@ -38,7 +38,8 @@ def reset_store(message):
     
 @bot.message_handler(func=lambda message: True)
 def handle_message(message):
-    bot.reply_to(message, message.text + '!!!')
+    reply = jules.emit_reply(message)
+    bot.send_message(message.chat.id, reply)
     
 if __name__ == '__main__':
     # Set up webhook
