@@ -9,7 +9,7 @@ import utils
 GOALS_FNAME = 'goals.txt'
 
 # How many of the most recent messages to send to the model
-N_CONTEXT_MESSAGES = 5
+N_CONTEXT_MESSAGES = 10
 
 with open(utils.sibpath('system_prompt.txt')) as f:
     SYSTEM_PROMPT = f.read()
