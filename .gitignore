@@ -2,3 +2,6 @@
 *.log
 messages.json
 venv/
+goals.txt
+system_prompt.txt
+__pycache__/
