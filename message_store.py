@@ -3,21 +3,15 @@ import json
 import os
 
 import utils
+import date_utils
 
 MESSAGE_HISTORY_FILENAME = 'messages.json'
 # Whether to pretty-print content in messages.json
 PPRINT_JSON = 1
 
-def fmt_timestamp(timestamp):
-    dt = datetime.datetime.fromtimestamp(timestamp)
-    timestr = dt.strftime("%m/%d %H:%M:%S")
-    return timestr
-
-def fmt_now():
-    return fmt_timestamp(datetime.datetime.now().timestamp())
 
 def munge_message(m):
-    timestr = fmt_timestamp(m['timestamp'])
+    timestr = date_utils.fmt_timestamp(m['timestamp'])
     return dict(
             role=m['role'],
             content=f"[{timestr}] {m['content']}",

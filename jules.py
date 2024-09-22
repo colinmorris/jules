@@ -5,6 +5,7 @@ import pathlib
 import message_store
 import llm
 import utils
+import date_utils
 
 GOALS_FNAME = 'goals.txt'
 
@@ -62,20 +63,30 @@ class Jules(object):
         # Finally, we insert a prefill message with a timestamp in the format of
         # the previously seen messages (so that the model doesn't insert its own
         # fake timestamp)
-        timestamp_str = message_store.fmt_now()
+        timestamp_str = date_utils.fmt_now()
         prefill = {
                 "role": "assistant",
                 "content": f"[{timestamp_str}] ",
         }
         messages = [system_message, goals_message] + context_messages + [prefill]
         reply = llm.query(messages)
-        # reply is a StreamingChoice object. Need to do some munging.
+        # reply is a NonStreamingChoice object. Need to do some munging.
         msg = reply['message']
         assert msg['role'] == 'assistant'
         text = msg['content']
+        if 'tool_calls' in msg:
+            return self._handle_tool_call(msg)
         self.messages.add_message(text, 'assistant')
         self.messages.flush()
         return text
+
+    def _handle_tool_call(self, msg):
+        """Handle any bookkeeping resulting from an LLM response that contains
+        a tool call (possibly including recording a scheduled message event,
+        and updating/flushing the message store) and return the user-facing
+        message that should be sent to the chat as a result of this LLM response.
+        msg is an OpenRouter NonStreamingChoice object.
+        """
 
 if __name__ == '__main__':
     # For testing/debugging

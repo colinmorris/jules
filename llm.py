@@ -39,11 +39,13 @@ def raw_query(messages):
     return response
 
 def query(messages):
+    """Returns an OpenRouter "NonStreamingChoice" object.
+    """
     resp = raw_query(messages)
     dat = json.loads(resp.text)
     msgs = dat['choices']
     assert len(msgs) == 1, msgs
-    # Should be a StreamingChoice object
+    # Should be a NonStreamingChoice object
     # https://openrouter.ai/docs/responses
     msg = msgs[0]
     assert 'error' not in msg, msg
