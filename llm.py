@@ -11,7 +11,7 @@ load_dotenv()
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = os.getenv('LLM_API_KEY')
 
-MODELNAME = "nousresearch/hermes-3-llama-3.1-405b"
+MODELNAME = "nousresearch/hermes-3-llama-3.1-405b:free"
 
 LOG_RESPONSES = 1
 RESPONSE_LOG_FILE = utils.sibpath('responses.log')
