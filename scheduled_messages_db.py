@@ -20,9 +20,20 @@ class ScheduledMessagesDatabase(object):
         self.conn = sqlite3.connect(DB_FNAME)
         # Create table if it doesn't exist
         # NB: "when" is a reserved keyword, hence why we call the column "wen" instead :|
+        # NB: id is the tool call id we get back from the model. That is supposed to be
+        # unique in the context of a session, but I don't know how strong that guarantee is
+        # in general, and in particular I have seen that it definitely is possible for the 
+        # model to reuse ids if the corresponding tool invocation isn't sent to them as part
+        # of the message history (either because we reset the message history or because it
+        # fell out of the context window). 
+        # The reason for the model returning a unique id in the first place is so that the 
+        # caller can do some bookkeeping when they send back the model the results of the 
+        # function call. That's not so important in this use case. So maybe we just use
+        # an autoincrementing primary key, and keep the id column (w/o unique constraint)
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS scheduled_messages (
-                id TEXT PRIMARY KEY,
+                rowid INTEGER PRIMARY KEY AUTOINCREMENT,
+                id TEXT,
                 wen DATETIME NOT NULL,
                 topic TEXT NOT NULL,
                 sent BOOLEAN DEFAULT FALSE
@@ -47,15 +58,15 @@ class ScheduledMessagesDatabase(object):
         )
         self.conn.commit()  # Commit changes to the database
 
-    def mark_message_sent(self, id):
-        """Mark the "sent" flag to true for message with given id.
+    def mark_message_sent(self, rowid):
+        """Mark the "sent" flag to true for message with given rowid.
 
         Args:
-            id: id of the message to mark as sent
+            rowid: rowid of the message to mark as sent
         """
         # Update the sent flag for the specific message
         self.conn.execute(
-            "UPDATE scheduled_messages SET sent = 1 WHERE id = ?", (id,)
+            "UPDATE scheduled_messages SET sent = 1 WHERE rowid = ?", (rowid,)
         )
         self.conn.commit()
 
@@ -68,7 +79,7 @@ class ScheduledMessagesDatabase(object):
         now = datetime.datetime.now()
         cursor = self.conn.cursor()
         cursor.execute(
-            "SELECT id, wen, topic FROM scheduled_messages WHERE wen < ? AND sent = 0",
+            "SELECT rowid, wen, topic FROM scheduled_messages WHERE wen < ? AND sent = 0",
             (now,),
         )
         # Fetch all pending messages as a list of tuples
@@ -76,7 +87,7 @@ class ScheduledMessagesDatabase(object):
 
         # Convert each tuple to a dictionary for easier access
         pending_messages = [
-            {"id": message[0], "wen": message[1], "topic": message[2]} for message in messages
+            {"rowid": message[0], "when": message[1], "topic": message[2]} for message in messages
         ]
         return pending_messages
 

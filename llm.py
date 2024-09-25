@@ -18,6 +18,8 @@ MODELNAME="google/gemini-flash-1.5-exp"
 # Haven't been able to get through to this one yet. Constantly get 429 "Resource has been exhausted" error messages.
 #MODELNAME="google/gemini-pro-1.5-exp"
 #MODELNAME="google/gemini-pro"
+# NB: Seems like Claude doesn't support prefill with tool use (at least with this model?)
+#MODELNAME="anthropic/claude-3-haiku:beta"
 
 LOG_RESPONSES = 1
 RESPONSE_LOG_FILE = utils.sibpath('responses.log')

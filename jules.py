@@ -99,29 +99,33 @@ class Jules(object):
         message that should be sent to the chat as a result of this LLM response.
         msg is an OpenRouter NonStreamingChoice object.
         """
-        resp = ''
-        # First check to see where the message contains content, or if it's just a tool call.
+        chat_reply = msg['content'] or ''
         calls = msg['tool_calls']
-        assert len(calls) == 1
-        call = calls[0]
-        call_id = call['id']
-        name = call['function']['name']
-        assert name == reminder_tool.TOOL['name']
-        argstr = call['function']['arguments']
-        args = json.loads(argstr)
-        assert args.keys() == {'when', 'topic'}
-        # TODO: error handling for invalid when
-        self.scheduled_messages_db.add_scheduled_message(
-                id=call_id,
-                when=args['when'],
-                topic=args['topic'],
-        )
-        self.messages.add_message(msg['content'], 'assistant', tool_calls=calls)
-        if msg['content']:
-            return msg['content']
-        else:
-            return f"Scheduled message at {when} with topic {topic}"
+        # Turns out models do actually sometimes decide to schedule multiple messages in one go!
+        for call in calls:
+            call_id = call['id']
+            name = call['function']['name']
+            assert name == reminder_tool.TOOL['name']
+            argstr = call['function']['arguments']
+            args = json.loads(argstr)
+            assert args.keys() == {'when', 'topic'}
+            # TODO: error handling for invalid when
+            self.scheduled_messages_db.add_scheduled_message(
+                    id=call_id,
+                    when=args['when'],
+                    topic=args['topic'],
+            )
+            # In general, it's important (at least during the testing stages) to add our own
+            # text to the chat to denote when a reminder has been set, even if the message
+            # content here is non-empty. Because we need to be able to distinguish cases where
+            # the model hallucinates calling the tool (e.g. by sending a basic text message that
+            # says "Okay, I've scheduled a message in 2 hours about X". I've even seen the model
+            # output text like `api.schedule_message({'when': '09/30/24 15:00:00', 'topic': 'foo bar baz'})`
+            tool_note = f"<Scheduled message at {when} with topic {topic}>"
+            chat_reply += (' ' if chat_reply else '') + tool_note
 
+        self.messages.add_message(msg['content'], 'assistant', tool_calls=calls)
+        return chat_reply
 
 if __name__ == '__main__':
     # For testing/debugging
