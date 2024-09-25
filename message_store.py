@@ -11,11 +11,17 @@ PPRINT_JSON = 1
 
 
 def munge_message(m):
+    """Translate a message dictionary of the form stored in messages.json to
+    the form expected by the LLM API.
+    """
     timestr = date_utils.fmt_timestamp(m['timestamp'])
-    return dict(
+    out = dict(
             role=m['role'],
             content=f"[{timestr}] {m['content']}",
     )
+    if 'tool_calls' in m:
+        out['tool_calls'] = m['tool_calls']
+    return out
 
 class MessageHistory(object):
     """A collection of chat messages backed by a file store.
@@ -24,6 +30,7 @@ class MessageHistory(object):
     - role: (user/assistant/system/tool)
     - content: text
     - timestamp: unix timestamp
+    - tool_calls (optional): per OpenRouter schema
     """
 
     def __init__(self, message_filename=None, reset=False):
@@ -36,7 +43,7 @@ class MessageHistory(object):
         else:
             self.messages = []
 
-    def add_message(self, text, role, timestamp=None):
+    def add_message(self, text, role, timestamp=None, tool_calls=None):
         """
         text: text of message
         role: one of 'user' or 'assistant'
@@ -44,11 +51,14 @@ class MessageHistory(object):
         """
         if timestamp is None:
             timestamp = int(datetime.datetime.now().timestamp())
-        self.messages.append(dict(
+        msg = dict(
             role=role,
             content=text,
             timestamp=timestamp,
-        ))
+        )
+        if tool_calls:
+            msg['tool_calls'] = tool_calls
+        self.messages.append(msg)
 
     def last_n_messages(self, n=5, munge=True):
         msgs = self.messages[-n:]

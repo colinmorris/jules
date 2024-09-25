@@ -5,3 +5,4 @@ venv/
 goals.txt
 system_prompt.txt
 __pycache__/
+scheduled_messages.db

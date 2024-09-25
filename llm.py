@@ -5,13 +5,19 @@ import json
 from dotenv import load_dotenv
 
 import utils
+import reminder_tool
 
 load_dotenv()
 
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = os.getenv('LLM_API_KEY')
 
-MODELNAME = "nousresearch/hermes-3-llama-3.1-405b:free"
+#MODELNAME = "nousresearch/hermes-3-llama-3.1-405b:free"
+# Free model that supports tool use
+MODELNAME="google/gemini-flash-1.5-exp"
+# Haven't been able to get through to this one yet. Constantly get 429 "Resource has been exhausted" error messages.
+#MODELNAME="google/gemini-pro-1.5-exp"
+#MODELNAME="google/gemini-pro"
 
 LOG_RESPONSES = 1
 RESPONSE_LOG_FILE = utils.sibpath('responses.log')
@@ -20,9 +26,13 @@ REQUEST_LOG_FILE = utils.sibpath('requests.log')
 
 def raw_query(messages):
     """Return a response object"""
+    tool = {"type": "function",
+            "function": reminder_tool.TOOL,
+    }
     data=json.dumps({
         "model": MODELNAME,
         "messages": messages,
+        "tools": [tool],
         })
     if LOG_REQUESTS:
         with open(REQUEST_LOG_FILE, 'a') as f:
@@ -42,6 +52,9 @@ def query(messages):
     """Returns an OpenRouter "NonStreamingChoice" object.
     """
     resp = raw_query(messages)
+    # Check for errors
+    print(f"Status code: {resp.status_code}")
+    resp.raise_for_status()
     dat = json.loads(resp.text)
     msgs = dat['choices']
     assert len(msgs) == 1, msgs

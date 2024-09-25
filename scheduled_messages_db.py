@@ -19,10 +19,11 @@ class ScheduledMessagesDatabase(object):
         """
         self.conn = sqlite3.connect(DB_FNAME)
         # Create table if it doesn't exist
+        # NB: "when" is a reserved keyword, hence why we call the column "wen" instead :|
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS scheduled_messages (
                 id TEXT PRIMARY KEY,
-                when DATETIME NOT NULL,
+                wen DATETIME NOT NULL,
                 topic TEXT NOT NULL,
                 sent BOOLEAN DEFAULT FALSE
             )
@@ -42,7 +43,7 @@ class ScheduledMessagesDatabase(object):
 
         # Insert message details into the table
         self.conn.execute(
-            "INSERT INTO scheduled_messages (id, when, topic) VALUES (?, ?, ?)", (id, dt, topic)
+            "INSERT INTO scheduled_messages (id, wen, topic) VALUES (?, ?, ?)", (id, dt, topic)
         )
         self.conn.commit()  # Commit changes to the database
 
@@ -67,7 +68,7 @@ class ScheduledMessagesDatabase(object):
         now = datetime.datetime.now()
         cursor = self.conn.cursor()
         cursor.execute(
-            "SELECT id, when, topic FROM scheduled_messages WHERE when < ? AND sent = 0",
+            "SELECT id, wen, topic FROM scheduled_messages WHERE wen < ? AND sent = 0",
             (now,),
         )
         # Fetch all pending messages as a list of tuples
@@ -75,7 +76,7 @@ class ScheduledMessagesDatabase(object):
 
         # Convert each tuple to a dictionary for easier access
         pending_messages = [
-            {"id": message[0], "when": message[1], "topic": message[2]} for message in messages
+            {"id": message[0], "wen": message[1], "topic": message[2]} for message in messages
         ]
         return pending_messages
 

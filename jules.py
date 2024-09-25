@@ -6,6 +6,8 @@ import message_store
 import llm
 import utils
 import date_utils
+import scheduled_messages_db
+import reminder_tool
 
 GOALS_FNAME = 'goals.txt'
 
@@ -21,6 +23,7 @@ class Jules(object):
         self.messages = message_store.MessageHistory()
         with open(utils.sibpath(GOALS_FNAME)) as f:
             self.goals_doc = f.read()
+        self.scheduled_messages_db = scheduled_messages_db.ScheduledMessagesDatabase()
 
     def emit_wakeup_message(self):
         # For now let's just add a dummy system message to set the context
@@ -72,6 +75,14 @@ class Jules(object):
         reply = llm.query(messages)
         # reply is a NonStreamingChoice object. Need to do some munging.
         msg = reply['message']
+        resp = self._handle_llm_message(msg)
+        return resp
+
+    def _handle_llm_message(self, msg):
+        """msg is the "message" part of a NonStreamingChoice object.
+        Record it in the message db and return a corresponding string that we should
+        send in the chat.
+        """
         assert msg['role'] == 'assistant'
         text = msg['content']
         if 'tool_calls' in msg:
@@ -80,6 +91,7 @@ class Jules(object):
         self.messages.flush()
         return text
 
+
     def _handle_tool_call(self, msg):
         """Handle any bookkeeping resulting from an LLM response that contains
         a tool call (possibly including recording a scheduled message event,
@@ -87,6 +99,29 @@ class Jules(object):
         message that should be sent to the chat as a result of this LLM response.
         msg is an OpenRouter NonStreamingChoice object.
         """
+        resp = ''
+        # First check to see where the message contains content, or if it's just a tool call.
+        calls = msg['tool_calls']
+        assert len(calls) == 1
+        call = calls[0]
+        call_id = call['id']
+        name = call['function']['name']
+        assert name == reminder_tool.TOOL['name']
+        argstr = call['function']['arguments']
+        args = json.loads(argstr)
+        assert args.keys() == {'when', 'topic'}
+        # TODO: error handling for invalid when
+        self.scheduled_messages_db.add_scheduled_message(
+                id=call_id,
+                when=args['when'],
+                topic=args['topic'],
+        )
+        self.messages.add_message(msg['content'], 'assistant', tool_calls=calls)
+        if msg['content']:
+            return msg['content']
+        else:
+            return f"Scheduled message at {when} with topic {topic}"
+
 
 if __name__ == '__main__':
     # For testing/debugging

@@ -15,7 +15,7 @@ def fmt_timestamp(timestamp):
 
 def parse_timestring(timestring):
     try:
-        return datetime.strptime(timestring, TIMESTAMP_FORMATSTRING)
+        return datetime.datetime.strptime(timestring, TIMESTAMP_FORMATSTRING)
     except ValueError:
         raise MalformedDateException()
 
