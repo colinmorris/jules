@@ -121,7 +121,7 @@ class Jules(object):
             # the model hallucinates calling the tool (e.g. by sending a basic text message that
             # says "Okay, I've scheduled a message in 2 hours about X". I've even seen the model
             # output text like `api.schedule_message({'when': '09/30/24 15:00:00', 'topic': 'foo bar baz'})`
-            tool_note = f"<Scheduled message at {when} with topic {topic}>"
+            tool_note = f"<Scheduled message at {args['when']} with topic {args['topic']}>"
             chat_reply += (' ' if chat_reply else '') + tool_note
 
         self.messages.add_message(msg['content'], 'assistant', tool_calls=calls)

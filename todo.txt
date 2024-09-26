@@ -1,3 +1,14 @@
+Next steps:
+- write canned initial messages (to populate message store on a cold start). Will need to do a little piping to dynamically insert fake timestamps. I'm hoping this will help encourage appropriate tool use and appropriate message length/tone.
+  - but might have to rewrite these if the scaffolding for sched/recurring messages changes? unless we do something clever
+- maybe write a few test cases in the form of short message histories corresponding to certain desired behaviours or scenarios. e.g.
+  - cold wakeup message
+  - scheduled message writing
+  - scheduling a message when appropriate
+- implement Jules.emit_scheduled_message method
+  - at the same time, maybe think about what approach to take for prompting recurring wakeup messages. I think the current approach of injecting a fake user message leaves something to be desired. Maybe a prefill instead? With <thinking>? Or insert a fake assistant message? I'm even kind of interested in what happens if I use the "system" role for something like this (it's sort of unclear to me whether this role is supposed to be used for anything other than the initial system prompt)
+- do some local testing (trying different models)
+
 - should I start writing unit tests...? (some trickiness with mocking up message store, scheduled messages db, and llm)
 - run send_pending_scheduled_messages.py periodically (might have to pay for basic pythonanywhere plan)
 - scaffolding for prompting the model to form a scheduled message
