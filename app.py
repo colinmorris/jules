@@ -34,6 +34,7 @@ def webhook():
 @bot.message_handler(commands=['reset'])
 def reset_store(message):
     jules.messages.reset()
+    jules.construct_canned_message_history()
     bot.send_message(message.chat.id, "(History reset)")
     
 @bot.message_handler(func=lambda message: True)

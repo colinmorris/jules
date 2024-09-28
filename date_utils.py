@@ -10,6 +10,9 @@ def fmt_timestamp(timestamp):
         "09/22/24 14:50:05"
     """
     dt = datetime.datetime.fromtimestamp(timestamp)
+    return fmt_dt(dt)
+
+def fmt_dt(dt):
     timestr = dt.strftime(TIMESTAMP_FORMATSTRING)
     return timestr
 

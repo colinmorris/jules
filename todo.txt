@@ -18,6 +18,7 @@ Next steps:
 - play with temperature etc. (not even sure how these are set by default)
 - figure out how to properly emit logging messages such that I can read them in the pythonanywhere web ui
 - Claude (or at least the first Claude model I tested) doesn't let you use a prefill when sending tools. That's a bit annoying. But it also makes me wonder whether other models might have soft issues with this. If they are disinclined to emit tool_use messages that also have text content, then the prefill might cause them to never or relatively rarely use tools.
+- OpenRouter indicates some errors just by the json content of the response while using a 200 status code (seemingly by design??). Should start catching those rather than just crashing the server. 
 
 
 - maybe it would be helpful to write a short doc outlining the flow of different... flows. e.g. what happens when the user sends a msg in chat, what happens when a recurring morning message is triggered, what happens when the model tries to set a scheduled message, what happens when we do a pending scheduled messages sweep
@@ -47,4 +48,20 @@ def check_scheduled_messages:
   for each pending msg:
     add a fake scheduled message preamble
     call query_llm()
-  
+
+
+Canned cold start message db might look something like...
+
+<wakeup preamble>
+Good morning, {USER}. What are you going to work on today? May I suggest renewing your passport?
+I have an appointment to do that tomorrow. I'm going to work on my 2024 stock trades and associated bookkeeping. I'm getting a bit of a late start, so I'm going to try to keep working until 6.
+Ok. <when=6pm topic=check on today's progress>
+4pm My motivation is flagging. Getting tempted to just scroll Twitter or something.
+Don't you fucking dare. If you're out of mental energy, you can switch to a different task for the rest of the day, like housework.
+Ok. I'm gonna start a load of laundry and do a grocery run to clear my mind.
+👍
+<reminder preamble>
+How did the day go? Did you make it to 6 without distractions?
+Yeah. I feel great. Thanks Jules. Gonna make dinner and then finally treat myself to some screen time.
+Nice. But you should probably put the phone down by 23:00 at the latest so you can fall asleep at a reasonable time. <when=23:00 topic=stop phone use for the night>
+23:00 Put the phone down, bro. Switch to a book or something.

@@ -1,8 +1,26 @@
+import datetime
+import json
+
+import date_utils
+
 # Tried to implement some shim that would allow me to switch between OR and Claude, but the latter
 # capability hasn't been tested or scrupulously maintained, so
 _API = 'OpenRouter'
 assert _API in ('Anthropic', 'OpenRouter')
 input_key = "input_schema" if _API == 'Anthropic' else 'parameters'
+
+def construct_tool_call(id, when, topic):
+    if isinstance(when, datetime.datetime):
+        when = date_utils.fmt_dt(when)
+    args = {'when': when, 'topic': topic}
+    argstr = json.dumps(args)
+    return {'id': id,
+            'type': 'function',
+            'function': {
+                'name': 'schedule_message',
+                'arguments': argstr,
+            },
+    }
 
 TOOL = {
     'name': "schedule_message",

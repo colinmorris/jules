@@ -20,11 +20,17 @@ MODELNAME="google/gemini-flash-1.5-exp"
 #MODELNAME="google/gemini-pro"
 # NB: Seems like Claude doesn't support prefill with tool use (at least with this model?)
 #MODELNAME="anthropic/claude-3-haiku:beta"
+# NB: This model has the restriction that "An assistant message with 'tool_calls' must be followed by tool messages responding to each 'tool_call_id'". Lame!
+#MODELNAME='openai/gpt-4o-mini'
+#MODELNAME='google/gemini-pro-1.5'
 
 LOG_RESPONSES = 1
 RESPONSE_LOG_FILE = utils.sibpath('responses.log')
 LOG_REQUESTS = 1
 REQUEST_LOG_FILE = utils.sibpath('requests.log')
+
+# Max length of llm response
+MAX_TOKENS = 800
 
 def raw_query(messages):
     """Return a response object"""
@@ -35,6 +41,7 @@ def raw_query(messages):
         "model": MODELNAME,
         "messages": messages,
         "tools": [tool],
+        "max_tokens": MAX_TOKENS,
         })
     if LOG_REQUESTS:
         with open(REQUEST_LOG_FILE, 'a') as f:
