@@ -79,7 +79,7 @@ class ScheduledMessagesDatabase(object):
         now = datetime.datetime.now()
         cursor = self.conn.cursor()
         cursor.execute(
-            "SELECT rowid, wen, topic FROM scheduled_messages WHERE wen < ? AND sent = 0",
+            "SELECT id, wen, topic FROM scheduled_messages WHERE wen < ? AND sent = 0",
             (now,),
         )
         # Fetch all pending messages as a list of tuples
@@ -87,7 +87,7 @@ class ScheduledMessagesDatabase(object):
 
         # Convert each tuple to a dictionary for easier access
         pending_messages = [
-            {"rowid": message[0], "when": message[1], "topic": message[2]} for message in messages
+            {"id": message[0], "when": message[1], "topic": message[2]} for message in messages
         ]
         return pending_messages
 

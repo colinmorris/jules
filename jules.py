@@ -44,6 +44,15 @@ class Jules(object):
         system_preamble = "It is 9am. Please emit a brief wakeup message for Colin."
         self.messages.add_message(system_preamble, 'system')
 
+    def emit_scheduled_message(self, id, when, topic):
+        """Functions similarly to emit_wakeup_message, but for messages scheduled
+        via the scheduled message tool.
+        """
+        preamble = f"Emit message with id {id} scheduled for {when} on topic: '{topic}'"
+        self.messages.add_message(preamble, 'system')
+        msg = self.query_llm()
+        return msg
+
     def emit_reply(self, user_message):
         """user_message: telegram Message object
         see https://core.telegram.org/bots/api#message

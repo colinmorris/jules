@@ -17,6 +17,6 @@ jules = juleslib.Jules()
 db = jules.scheduled_messages_db
 pending = db.get_pending_messages()
 for pend in pending:
-    chat_msg = jules.emit_scheduled_message(pend)
+    chat_msg = jules.emit_scheduled_message(**pend)
     bot.send_message(CHAT_ID, chat_msg)
     db.mark_message_sent(pend['rowid'])
