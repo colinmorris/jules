@@ -26,19 +26,23 @@ class Jules(object):
         self.scheduled_messages_db = scheduled_messages_db.ScheduledMessagesDatabase()
 
     def emit_wakeup_message(self):
-        # For now let's just add a dummy system message to set the context
-        # for this task
-        # (Actually, this problem won't work, since it seems these models
-        # are trained on convos that strictly alternate between user and assistant
-        # messages? Maybe can do something with prefill here?)
+        """Return a chat message corresponding to our recurring first-thing-in-the-morning scheduled
+        message pattern. We accomplish this by first inserting a message into the history
+        prompting the model to generate a wakeup message with the desired properties.
+        """
+        self._insert_wakeup_preamble()
+        msg = self.query_llm()
+        return msg
+
+    def _insert_wakeup_preamble(self):
         preamble = "<thinking>It's 9am. Time for Colin's morning wakeup message. I will encourage him to start the day in a thoughtful way, avoiding falling into distractions. I will pick only ONE item from the goal list to suggest he work on. If he pushes back, I'll work with him to identify a different goal.</thinking>"
         #self.messages.add_message(preamble, 'assistant')
 
         # Trying a different tack
         user_preamble = "Good morning Jules. I could use some encouragement to start the morning in a salutary way, and a suggestion for one task to work on today."
-        self.messages.add_message(user_preamble, 'user')
-        msg = self.query_llm()
-        return msg
+        #self.messages.add_message(user_preamble, 'user')
+        system_preamble = "It is 9am. Please emit a brief wakeup message for Colin."
+        self.messages.add_message(system_preamble, 'system')
 
     def emit_reply(self, user_message):
         """user_message: telegram Message object
